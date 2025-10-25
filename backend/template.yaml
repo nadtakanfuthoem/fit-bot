@@ -1,0 +1,221 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: FitBot - AI-Powered Fitness Program Backend
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: nodejs18.x
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        ANTHROPIC_API_KEY: !Ref AnthropicApiKey
+  Api:
+    Cors:
+      AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
+
+Parameters:
+  AnthropicApiKey:
+    Type: String
+    Description: Anthropic API Key for Claude AI
+    NoEcho: true
+  Stage:
+    Type: String
+    Default: dev
+    Description: API Gateway stage name
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+
+Resources:
+  # API Gateway
+  FitBotApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+      Cors:
+        AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+
+  # Lambda Functions
+  GenerateWorkoutPlanFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers/workoutPlan.generate
+      Description: Generate personalized workout plans using Claude AI
+      Events:
+        WorkoutPlanApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref FitBotApi
+            Path: /api/workout-plan
+            Method: POST
+
+  TrackProgressFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers/progress.track
+      Description: Track and analyze fitness progress
+      Events:
+        ProgressApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref FitBotApi
+            Path: /api/progress
+            Method: POST
+
+  GetRecommendationsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers/recommendations.get
+      Description: Get personalized fitness recommendations
+      Events:
+        RecommendationsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref FitBotApi
+            Path: /api/recommendations
+            Method: POST
+
+  ChatWithAgentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handlers/chat.interact
+      Description: Interactive chat with AI fitness coach
+      Events:
+        ChatApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref FitBotApi
+            Path: /api/chat
+            Method: POST
+
+  # DynamoDB Tables (for future use)
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub FitBot-Users-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      Tags:
+        - Key: Project
+          Value: FitBot
+
+  WorkoutsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub FitBot-Workouts-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: workoutId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: workoutId
+          KeyType: RANGE
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      Tags:
+        - Key: Project
+          Value: FitBot
+
+  ProgressTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub FitBot-Progress-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      Tags:
+        - Key: Project
+          Value: FitBot
+
+  # IAM Roles for Lambda Functions
+  LambdaDynamoDBRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource:
+                  - !GetAtt UsersTable.Arn
+                  - !GetAtt WorkoutsTable.Arn
+                  - !GetAtt ProgressTable.Arn
+
+Outputs:
+  FitBotApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub https://${FitBotApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}
+    Export:
+      Name: !Sub FitBot-Api-Url-${Stage}
+
+  UsersTableName:
+    Description: DynamoDB Users table name
+    Value: !Ref UsersTable
+    Export:
+      Name: !Sub FitBot-Users-Table-${Stage}
+
+  WorkoutsTableName:
+    Description: DynamoDB Workouts table name
+    Value: !Ref WorkoutsTable
+    Export:
+      Name: !Sub FitBot-Workouts-Table-${Stage}
+
+  ProgressTableName:
+    Description: DynamoDB Progress table name
+    Value: !Ref ProgressTable
+    Export:
+      Name: !Sub FitBot-Progress-Table-${Stage}
+
+  Region:
+    Description: AWS Region
+    Value: !Ref AWS::Region

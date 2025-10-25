@@ -16,7 +16,8 @@ A comprehensive fitness application with an AI agent backend powered by Claude A
 - **Technology**: AWS Lambda + API Gateway
 - **Runtime**: Node.js 18.x
 - **AI Model**: Claude 3.5 Sonnet (Anthropic)
-- **Framework**: Serverless Framework
+- **Framework**: AWS SAM (Serverless Application Model)
+- **Database**: DynamoDB (for user data, workouts, progress)
 
 ### Frontend
 - **Framework**: Angular 17
@@ -34,7 +35,8 @@ fitness-app/
 │   │   ├── progress.js          # Progress tracking
 │   │   ├── recommendations.js   # Fitness recommendations
 │   │   └── chat.js              # Interactive chat
-│   ├── serverless.yml           # Serverless configuration
+│   ├── template.yaml            # SAM/CloudFormation template
+│   ├── samconfig.toml           # SAM configuration
 │   ├── package.json
 │   └── README.md
 ├── frontend/
@@ -68,7 +70,8 @@ fitness-app/
 - AWS Account (for backend deployment)
 - Anthropic API Key (for Claude AI)
 - Angular CLI (`npm install -g @angular/cli`)
-- Serverless Framework (`npm install -g serverless`)
+- AWS CLI configured with your credentials
+- AWS SAM CLI (`pip install aws-sam-cli` or see [SAM Installation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html))
 
 ### Backend Setup
 
@@ -82,37 +85,50 @@ cd fitness-app/backend
 npm install
 ```
 
-3. Set up your Anthropic API key:
+3. Set up local environment:
 ```bash
-# Windows (PowerShell)
-$env:ANTHROPIC_API_KEY="your_api_key_here"
+# Copy the example environment file
+cp env.example.json env.json
 
-# Windows (CMD)
-set ANTHROPIC_API_KEY=your_api_key_here
-
-# Mac/Linux
-export ANTHROPIC_API_KEY=your_api_key_here
+# Edit env.json and add your Anthropic API key
 ```
 
-4. Configure AWS credentials:
+4. Validate the SAM template:
 ```bash
-serverless config credentials --provider aws --key YOUR_AWS_KEY --secret YOUR_AWS_SECRET
+npm run validate
 ```
 
-5. Deploy to AWS:
+5. Build the application:
+```bash
+npm run build
+```
+
+6. Deploy to AWS (first-time guided deployment):
 ```bash
 npm run deploy
 ```
 
-6. Note the API Gateway URL from the deployment output.
+Follow the prompts to:
+- Confirm stack name (default: fitbot-backend)
+- Confirm AWS region (default: us-east-1)
+- Enter your Anthropic API key when prompted
+- Accept the deployment
+
+7. Note the API Gateway URL from the deployment output (FitBotApiUrl)
+
+For subsequent deployments:
+```bash
+npm run deploy:fast
+```
 
 #### Running Backend Locally
 
+Start the local API server:
 ```bash
 npm run local
 ```
 
-This runs the backend at `http://localhost:3000`.
+This runs the backend at `http://localhost:3000`
 
 ### Frontend Setup
 
@@ -198,10 +214,11 @@ Interactive chat with AI fitness coach
 
 ### Backend
 - AWS Lambda (Serverless compute)
-- API Gateway (HTTP API)
+- API Gateway (REST API)
+- DynamoDB (NoSQL database)
 - Node.js 18.x
 - Anthropic Claude 3.5 Sonnet
-- Serverless Framework
+- AWS SAM / CloudFormation (Infrastructure as Code)
 
 ### Frontend
 - Angular 17
@@ -225,9 +242,23 @@ Modify `frontend/src/styles.css` for global styles or individual component CSS f
 ## Deployment
 
 ### Backend Deployment
+
+First-time deployment:
 ```bash
 cd backend
+npm run build
 npm run deploy
+```
+
+Subsequent deployments:
+```bash
+cd backend
+npm run deploy:fast
+```
+
+Deploy to specific environment:
+```bash
+sam deploy --config-env prod
 ```
 
 ### Frontend Deployment
@@ -255,15 +286,16 @@ Deploy the `dist/` folder to your hosting provider (AWS S3, Netlify, Vercel, etc
 
 ## Future Enhancements
 
-- [ ] User authentication and profiles
-- [ ] Data persistence (DynamoDB)
+- [ ] User authentication and profiles (Cognito)
+- [x] Data persistence (DynamoDB tables provisioned)
+- [ ] Connect Lambda functions to DynamoDB for data persistence
 - [ ] Workout history and analytics
 - [ ] Social features and community
 - [ ] Mobile app (React Native / Ionic)
-- [ ] Integration with fitness trackers
+- [ ] Integration with fitness trackers (Apple Health, Google Fit)
 - [ ] Meal planning feature
 - [ ] Video exercise demonstrations
-- [ ] Progress photos and comparisons
+- [ ] Progress photos and comparisons with S3 storage
 
 ## License
 

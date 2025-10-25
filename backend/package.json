@@ -1,18 +1,21 @@
 {
   "name": "fitness-agent-backend",
   "version": "1.0.0",
-  "description": "Serverless fitness program agent",
+  "description": "AWS SAM fitness program agent",
   "main": "index.js",
   "scripts": {
-    "deploy": "serverless deploy",
-    "local": "serverless offline"
+    "build": "sam build",
+    "deploy": "sam deploy --guided",
+    "deploy:fast": "sam build && sam deploy",
+    "local": "sam local start-api --env-vars env.json",
+    "invoke": "sam local invoke",
+    "logs": "sam logs --tail",
+    "validate": "sam validate",
+    "sync": "sam sync --watch"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
     "aws-sdk": "^2.1691.0"
   },
-  "devDependencies": {
-    "serverless": "^3.38.0",
-    "serverless-offline": "^13.3.0"
-  }
+  "devDependencies": {}
 }
