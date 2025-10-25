@@ -1,0 +1,68 @@
+<div class="chat-container">
+  <h1>Chat with FitBot</h1>
+
+  <div class="chat-card">
+    <div class="chat-messages">
+      <div
+        *ngFor="let message of messages"
+        class="message"
+        [class.user-message]="message.role === 'user'"
+        [class.assistant-message]="message.role === 'assistant'">
+        <div class="message-avatar">
+          {{ message.role === 'user' ? '👤' : '🤖' }}
+        </div>
+        <div class="message-content">
+          <div class="message-text">{{ message.content }}</div>
+          <div class="message-time">
+            {{ message.timestamp | date:'short' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="message assistant-message" *ngIf="loading">
+        <div class="message-avatar">🤖</div>
+        <div class="message-content">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input">
+      <textarea
+        [(ngModel)]="currentMessage"
+        (keydown)="handleKeyPress($event)"
+        placeholder="Ask me anything about fitness, nutrition, or workouts..."
+        rows="2"
+        [disabled]="loading">
+      </textarea>
+      <button
+        (click)="sendMessage()"
+        [disabled]="!currentMessage.trim() || loading"
+        class="send-btn">
+        Send
+      </button>
+    </div>
+  </div>
+
+  <div class="suggestions">
+    <h3>Try asking:</h3>
+    <div class="suggestion-chips">
+      <button class="chip" (click)="currentMessage = 'How can I improve my squat form?'; sendMessage()">
+        Squat form tips
+      </button>
+      <button class="chip" (click)="currentMessage = 'What should I eat before a workout?'; sendMessage()">
+        Pre-workout nutrition
+      </button>
+      <button class="chip" (click)="currentMessage = 'How do I break through a plateau?'; sendMessage()">
+        Breaking plateaus
+      </button>
+      <button class="chip" (click)="currentMessage = 'Best exercises for core strength?'; sendMessage()">
+        Core exercises
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,75 @@
+<div class="dashboard">
+  <h1>Dashboard</h1>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">🏋️</div>
+      <div class="stat-info">
+        <h3>{{ stats.workoutsCompleted }}</h3>
+        <p>Workouts Completed</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🔥</div>
+      <div class="stat-info">
+        <h3>{{ stats.currentStreak }}</h3>
+        <p>Day Streak</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <div class="stat-info">
+        <h3>{{ stats.totalDays }}</h3>
+        <p>Total Days</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">⚖️</div>
+      <div class="stat-info">
+        <h3>{{ stats.weightProgress }} kg</h3>
+        <p>Weight Progress</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <div class="card">
+      <h2>Recent Activities</h2>
+      <div class="activities-list">
+        <div class="activity-item" *ngFor="let activity of recentActivities">
+          <div class="activity-date">{{ activity.date }}</div>
+          <div class="activity-details">
+            <strong>{{ activity.workout }}</strong>
+            <span class="duration">{{ activity.duration }}</span>
+          </div>
+          <div class="activity-status" [class.completed]="activity.completed">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Upcoming Workouts</h2>
+      <div class="upcoming-list">
+        <div class="upcoming-item" *ngFor="let workout of upcomingWorkouts">
+          <div class="upcoming-day">{{ workout.day }}</div>
+          <div class="upcoming-details">
+            <strong>{{ workout.workout }}</strong>
+            <span class="time">{{ workout.time }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <button class="action-btn primary" routerLink="/workout-plan">
+      Generate New Plan
+    </button>
+    <button class="action-btn secondary" routerLink="/chat">
+      Chat with FitBot
+    </button>
+  </div>
+</div>

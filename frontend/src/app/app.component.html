@@ -1,0 +1,23 @@
+<div class="app-container">
+  <nav class="navbar">
+    <div class="nav-brand">
+      <h1>FitBot</h1>
+      <span class="tagline">Your AI Fitness Coach</span>
+    </div>
+    <ul class="nav-menu">
+      <li><a routerLink="/dashboard" routerLinkActive="active">Dashboard</a></li>
+      <li><a routerLink="/workout-plan" routerLinkActive="active">Workout Plan</a></li>
+      <li><a routerLink="/progress" routerLinkActive="active">Progress</a></li>
+      <li><a routerLink="/recommendations" routerLinkActive="active">Tips</a></li>
+      <li><a routerLink="/chat" routerLinkActive="active">Chat</a></li>
+    </ul>
+  </nav>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2025 FitBot - Powered by AI</p>
+  </footer>
+</div>

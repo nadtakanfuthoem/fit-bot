@@ -1,0 +1,125 @@
+<div class="progress-tracker">
+  <h1>Track Your Progress</h1>
+
+  <div class="form-card">
+    <form (ngSubmit)="trackProgress()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="currentWeight">Current Weight (kg)</label>
+          <input
+            type="number"
+            id="currentWeight"
+            [(ngModel)]="progressData.currentWeight"
+            name="currentWeight"
+            step="0.1"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="targetWeight">Target Weight (kg)</label>
+          <input
+            type="number"
+            id="targetWeight"
+            [(ngModel)]="progressData.targetWeight"
+            name="targetWeight"
+            step="0.1"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="completedWorkouts">Workouts Completed</label>
+          <input
+            type="number"
+            id="completedWorkouts"
+            [(ngModel)]="progressData.completedWorkouts"
+            name="completedWorkouts"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="startDate">Program Start Date</label>
+          <input
+            type="date"
+            id="startDate"
+            [(ngModel)]="progressData.startDate"
+            name="startDate"
+            required
+          />
+        </div>
+      </div>
+
+      <h3>Body Measurements (cm) - Optional</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="chest">Chest</label>
+          <input
+            type="number"
+            id="chest"
+            [(ngModel)]="progressData.measurements.chest"
+            name="chest"
+            step="0.1"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="waist">Waist</label>
+          <input
+            type="number"
+            id="waist"
+            [(ngModel)]="progressData.measurements.waist"
+            name="waist"
+            step="0.1"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="hips">Hips</label>
+          <input
+            type="number"
+            id="hips"
+            [(ngModel)]="progressData.measurements.hips"
+            name="hips"
+            step="0.1"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="arms">Arms</label>
+          <input
+            type="number"
+            id="arms"
+            [(ngModel)]="progressData.measurements.arms"
+            name="arms"
+            step="0.1"
+          />
+        </div>
+      </div>
+
+      <button type="submit" class="track-btn" [disabled]="loading">
+        <span *ngIf="!loading">Analyze My Progress</span>
+        <span *ngIf="loading">Analyzing...</span>
+      </button>
+
+      <div class="error-message" *ngIf="error">
+        {{ error }}
+      </div>
+    </form>
+  </div>
+
+  <div class="analysis-result" *ngIf="analysis">
+    <h2>Your Progress Analysis</h2>
+    <div class="analysis-content" [innerHTML]="formatAnalysis(analysis)"></div>
+  </div>
+
+  <div class="loading-indicator" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Analyzing your progress...</p>
+  </div>
+</div>
